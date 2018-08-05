@@ -123,7 +123,7 @@ function configure() {
     console.log("You're all set!");
     console.log("*******************************************************************************************");
     console.log("***************              To change API keys, run:                  ********************");
-    console.log("***************   cd node_modules/nativescript-plugin-google-places    ********************");
+    console.log("***************   cd node_modules/nativescript-plugin-gplaces    ********************");
     console.log("***************                 npm run configure                      ********************");
     console.log("*******************************************************************************************");
 }
