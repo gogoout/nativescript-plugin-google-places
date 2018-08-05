@@ -1,6 +1,6 @@
 {
   "name": "nativescript-plugin-gplaces",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "Choose a place using Google Place Picker",
   "main": "plugin-google-places",
   "typings": "index.d.ts",
@@ -23,6 +23,7 @@
     "clean": "cd ../demo-ng && rimraf hooks node_modules platforms && cd ../src && rimraf node_modules && npm run plugin.link",
     "ci.tslint": "npm i && tslint '**/*.ts' --config '../tslint.json' --exclude '**/node_modules/**'",
     "build-scripts": "npm install --ignore-scripts && webpack --config scripts/webpack.config.js scripts/installer.js scripts/postinstall.js && webpack --config scripts/webpack.config.js scripts/resetter.js scripts/reset.js",
+    "postinstall": "node scripts/postinstall.js",
     "configure": "node scripts/reset.js && npm run postinstall"
   },
   "keywords": [
