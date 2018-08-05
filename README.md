@@ -1,6 +1,6 @@
-# Nativescript Plugin Google Places
+# Nativescript Plugin GPlaces
 
-[![npm version](https://badge.fury.io/js/nativescript-plugin-google-places.svg)](https://badge.fury.io/js/nativescript-plugin-google-places)
+[![npm version](https://badge.fury.io/js/nativescript-plugin-gplaces.svg)](https://badge.fury.io/js/nativescript-plugin-gplaces)
 
 Nativescript plugin for [Google Places API](https://developers.google.com/places/). Based on [tylergrinn](https://github.com/tylergrinn/nativescript-plugin-google-places) and [debevv](https://github.com/debevv/nativescript-plugin-google-places).
 
@@ -34,14 +34,14 @@ If you want to use the getStaticMapUrl function you'll need to create a browser 
 ## Installation
 
 ```javascript
-tns plugin add nativescript-plugin-google-places
+tns plugin add nativescript-plugin-gplaces
 ```
 
 ## Usage 
 
 To import:
 ```javascript
-import * as GooglePlaces from 'nativescript-plugin-google-places';
+import * as GooglePlaces from 'nativescript-plugin-gplaces';
 ```
 
 Run the init function in the App.Module constructor if you're using angular or the app.ts file otherwise
@@ -157,7 +157,7 @@ or the dark version:
 * Installer script now adds iOS images manually since the cocoapods version was inaccessible. If updating rather than installing for the first time, run:
 
 ```
-cd node_modules/nativescript-plugin-google-places && npm run configure
+cd node_modules/nativescript-plugin-gplaces && npm run configure
 ```
 
 #### v1.2.0
