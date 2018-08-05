@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 
-import * as GooglePlaces from 'nativescript-plugin-google-places';
+import * as GooglePlaces from 'nativescript-plugin-gplaces';
 
 import { ImageSource } from 'image-source';
 import * as platform from "tns-core-modules/platform";

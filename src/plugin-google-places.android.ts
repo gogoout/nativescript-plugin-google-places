@@ -1,10 +1,34 @@
 import * as app from "tns-core-modules/application";
 import * as utils from "tns-core-modules/utils/utils";
 
-import { Place, Location, Viewport } from './index';
+import {Place, Location, Viewport} from './index';
 import * as Common from './plugin-google-places.common';
 
 declare var com: any;
+
+function placeTransformer(place: any): Place {
+    return {
+        name: place.getName ? place.getName() : '',
+        id: place.getId ? place.getId() : '',
+        attributions: place.getAttributions ? place.getAttributions() : '',
+        address: place.getAddress ? place.getAddress() : '',
+        types: place.getPlaceTypes ? utils.ad.collections.stringSetToStringArray(place.getPlaceTypes()).map(type => placesStrings[type]) : [],
+        coordinates: place.getLatLng ? {
+            latitude: place.getLatLng().latitude,
+            longitude: place.getLatLng().longitude
+        } : null,
+        viewport: place.getViewport ? {
+            northEast: {
+                latitude: place.getViewport().northeast.latitude,
+                longitude: place.getViewport().northeast.longitude
+            },
+            southWest: {
+                latitude: place.getViewport().southwest.latitude,
+                longitude: place.getViewport().southwest.longitude
+            }
+        } : null
+    };
+}
 
 export function init(): void {}
 
@@ -12,13 +36,13 @@ export function pickPlace(viewport: Viewport): Promise<Place> {
     return new Promise<Place>((resolve, reject) => {
         try {
             let geoClient = com.google.android.gms.location.places.Places.getGeoDataClient(app.android.context, null);
-            let placeDetectionClient =  com.google.android.gms.location.places.Places.getPlaceDetectionClient(app.android.context, null);
-            
+            let placeDetectionClient = com.google.android.gms.location.places.Places.getPlaceDetectionClient(app.android.context, null);
+
             let PLACE_PICKER_REQUEST = 1;
 
             let builder = new com.google.android.gms.location.places.ui.PlacePicker.IntentBuilder();
 
-            if(viewport) {
+            if (viewport) {
                 let southWest = new com.google.android.gms.maps.model.LatLng(viewport.southWest.latitude, viewport.southWest.longitude);
                 let northEast = new com.google.android.gms.maps.model.LatLng(viewport.northEast.latitude, viewport.northEast.longitude);
 
@@ -30,20 +54,12 @@ export function pickPlace(viewport: Viewport): Promise<Place> {
             app.android.on("activityResult", (args) => {
                 if (args.requestCode === PLACE_PICKER_REQUEST && args.resultCode === android.app.Activity.RESULT_OK) {
                     let place = com.google.android.gms.location.places.ui.PlacePicker.getPlace(args.intent, app.android.context);
-
-                    getPlacesById([place.getId()]).then(places => {
-                        if(places.length != 1) {
-                            reject("Error");
-                        } else {
-                            resolve(places[0]);
-                        }
-                    }).catch(error => reject(error));
-                    
+                    resolve(placeTransformer(place));
                 }
             });
-            
+
             app.android.foregroundActivity.startActivityForResult(builder.build(app.android.foregroundActivity), PLACE_PICKER_REQUEST);
-        } catch(error) {
+        } catch (error) {
             reject(error);
         }
     })
@@ -53,45 +69,25 @@ export function getPlacesById(ids: string[]): Promise<Place[]> {
     return new Promise((resolve, reject) => {
         try {
             let geoClient = com.google.android.gms.location.places.Places.getGeoDataClient(app.android.context, null);
-        
+
             geoClient.getPlaceById(ids).addOnCompleteListener(new com.google.android.gms.tasks.OnCompleteListener({
                 onComplete: (placesBufferTask): void => {
-                    
-                    if(!placesBufferTask.isSuccessful()) {
+
+                    if (!placesBufferTask.isSuccessful()) {
                         reject(placesBufferTask.getException());
                     } else {
-                        
+
                         let placesBuffer = placesBufferTask.getResult()
-                        
+
                         let places: Place[] = [];
 
-                        for(let i = 0; i < placesBuffer.getCount(); i++) {
+                        for (let i = 0; i < placesBuffer.getCount(); i++) {
 
                             let place = placesBuffer.get(i);
-                            places.push({
-                                name: place.getName ? place.getName() : '',
-                                id: place.getId ? place.getId() : '',
-                                attributions: place.getAttributions ? place.getAttributions() : '',
-                                address: place.getAddress ? place.getAddress() : '',
-                                types: place.getPlaceTypes ? utils.ad.collections.stringSetToStringArray(place.getPlaceTypes()).map(type => placesStrings[type]) : [],
-                                coordinates: place.getLatLng ? {
-                                    latitude: place.getLatLng().latitude,
-                                    longitude: place.getLatLng().longitude
-                                } : null,
-                                viewport: place.getViewport ? {
-                                    northEast: {
-                                        latitude: place.getViewport().northeast.latitude,
-                                        longitude: place.getViewport().northeast.longitude
-                                    },
-                                    southWest: {
-                                        latitude: place.getViewport().southwest.latitude,
-                                        longitude: place.getViewport().southwest.longitude
-                                    }
-                                } : null
-                            });
+                            places.push(placeTransformer(place));
                         }
 
-                        if(places.length !== ids.length) {
+                        if (places.length !== ids.length) {
                             reject("Some places could not be found");
                         } else {
                             resolve(places);
@@ -100,14 +96,14 @@ export function getPlacesById(ids: string[]): Promise<Place[]> {
                 }
             }));
 
-            
-        } catch(error) {
+
+        } catch (error) {
             reject(error);
         }
     });
 }
 
-export function getStaticMapUrl(place: Place, options: { width: number, height: number}): string {
+export function getStaticMapUrl(place: Place, options: { width: number, height: number }): string {
     return Common.getStaticMapUrl(place, options);
 }
 

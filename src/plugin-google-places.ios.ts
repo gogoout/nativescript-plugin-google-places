@@ -1,7 +1,9 @@
-import { ContentView } from 'tns-core-modules/ui/content-view';
+import {ContentView} from 'tns-core-modules/ui/content-view';
 import * as utils from "tns-core-modules/utils/utils";
+import {topmost} from "tns-core-modules/ui/frame";
+import {Page} from "tns-core-modules/ui/page"
 
-import { Place, Location, Viewport } from './index';
+import {Place, Location, Viewport} from './index';
 import * as Common from './plugin-google-places.common';
 
 declare class GMSPlace extends NSObject {
@@ -11,13 +13,16 @@ declare class GMSPlace extends NSObject {
     public attributions: any;
     public types: any;
     public coordinate: any;
-    public viewport: any;
+    public viewport?: any;
+    public addressComponents?: NSArray<{ type: string, name: string }>
 };
 
 declare class GMSPlacesClient extends NSObject {
     static provideAPIKey(key: string): void;
+
     static sharedClient(): GMSPlacesClient;
-    lookUpPlaceIDCallback(id: string, callback: (place: GMSPlace, error) => void ): void;
+
+    lookUpPlaceIDCallback(id: string, callback: (place: GMSPlace, error) => void): void;
 };
 
 declare var GMSServices: any;
@@ -27,7 +32,7 @@ export function init(): void {
     GMSServices.provideAPIKey("__API_KEY__");
 }
 
-export function pickPlace(viewport?: Viewport): Promise<Place>{
+export function pickPlace(viewport?: Viewport): Promise<Place> {
     return PlacePicker.Instance.pickPlace(viewport);
 }
 
@@ -39,37 +44,17 @@ export function getPlacesById(ids: string[]): Promise<Place[]> {
         let places: Place[] = [];
 
         let getPlacesRecursive = () => {
-            if(ids.length === 0) {
+            if (ids.length === 0) {
                 resolve(places);
             } else {
                 client.lookUpPlaceIDCallback(ids.shift(), (place: GMSPlace, error) => {
-                    if(!place) {
+                    if (!place) {
                         reject(error);
                     } else {
-                        places.push({
-                            name: place.name,
-                            id: place.placeID,
-                            address: place.formattedAddress,
-                            attributions: place.attributions,
-                            types: utils.ios.collections.nsArrayToJSArray(place.types),
-                            coordinates: {
-                                latitude: place.coordinate.latitude,
-                                longitude: place.coordinate.longitude
-                            },
-                            viewport: {
-                                northEast: {
-                                    latitude: place.viewport.northEast.latitude,
-                                    longitude: place.viewport.northEast.longitude
-                                },
-                                southWest: {
-                                    latitude: place.viewport.southWest.latitude,
-                                    longitude: place.viewport.southWest.longitude
-                                }
-                            }
-                        });
+                        places.push(placeTransformer(place));
                     }
 
-                    getPlacesRecursive();                    
+                    getPlacesRecursive();
                 });
             }
         }
@@ -82,19 +67,56 @@ export function getStaticMapUrl(place: Place, options: { width: number, height: 
     return Common.getStaticMapUrl(place, options);
 }
 
+function placeTransformer(place: GMSPlace): Place {
+    const result: Place = {
+        name: place.name,
+        id: place.placeID,
+        address: place.formattedAddress,
+        attributions: place.attributions,
+        types: utils.ios.collections.nsArrayToJSArray(place.types),
+        coordinates: {
+            latitude: place.coordinate.latitude,
+            longitude: place.coordinate.longitude
+        }
+    };
+    if (place.viewport) {
+        result.viewport = {
+            northEast: {
+                latitude: place.viewport.northEast.latitude,
+                longitude: place.viewport.northEast.longitude
+            },
+            southWest: {
+                latitude: place.viewport.southWest.latitude,
+                longitude: place.viewport.southWest.longitude
+            }
+        }
+    }
+    if (place.addressComponents) {
+        result.addressComponents = {};
+        const addressComponentsArr: any[] = utils.ios.collections.nsArrayToJSArray(place.addressComponents);
+        addressComponentsArr.forEach(addresscomponent => result.addressComponents[addresscomponent.type] = addresscomponent.name);
+    }
+    return result;
+}
+
 declare class GMSPlacePickerViewControllerDelegate extends NSObject {};
 
 declare class GMSPlacePickerViewController extends UIViewController {
     public static alloc(): GMSPlacePickerViewController;
+
     public initWithConfig(config: GMSPlacePickerConfig): GMSPlacePickerViewController;
+
     public delegate: GMSPlacePickerViewControllerDelegate;
 };
 
 
 declare class GMSCoordinateBounds extends NSObject {
     public static alloc(): GMSCoordinateBounds;
+
     public initWithCoordinateCoordinate(...params: any[]): GMSCoordinateBounds;
+
     public initWithRegion(...params: any[]): GMSCoordinateBounds;
+
     public northEast: CLLocationCoordinate2D;
     public southWest: CLLocationCoordinate2D;
     public valid: boolean;
@@ -102,7 +124,9 @@ declare class GMSCoordinateBounds extends NSObject {
 
 declare class GMSPlacePickerConfig extends NSObject {
     public static alloc(): GMSPlacePickerConfig;
+
     public initWithViewport(viewport: GMSCoordinateBounds): GMSPlacePickerConfig;
+
     public viewport: GMSCoordinateBounds;
 }
 
@@ -120,19 +144,24 @@ class PlacePicker extends NSObject implements GMSPlacePickerViewControllerDelega
     private reject: (error) => void;
     private placePickerViewController: GMSPlacePickerViewController;
 
-    static get Instance(): PlacePicker{
-        if(!this._instance){
+    static get Instance(): PlacePicker {
+        if (!this._instance) {
             this._instance = PlacePicker.new();
             this._instance.initialize();
         }
         return this._instance;
     }
 
-    public pickPlace(viewport?: Viewport): Promise<Place>{
+    private get currentViewController(): any {
+        const topView = topmost();
+        return (topView.currentPage.modal || topView).viewController;
+    }
+
+    public pickPlace(viewport?: Viewport): Promise<Place> {
 
         let bounds: GMSCoordinateBounds = null;
-        
-        if(viewport) {
+
+        if (viewport) {
             let northEast = new CLLocationCoordinate2D();
             northEast.latitude = viewport.northEast.latitude;
             northEast.longitude = viewport.northEast.longitude;
@@ -148,9 +177,8 @@ class PlacePicker extends NSObject implements GMSPlacePickerViewControllerDelega
 
         this.placePickerViewController.initWithConfig(config);
 
-        let rootViewController = utils.ios.getter(UIApplication, UIApplication.sharedApplication).keyWindow.rootViewController;         
-        rootViewController.presentViewControllerAnimatedCompletion(this.placePickerViewController, true, null);
-        
+        this.currentViewController.presentViewControllerAnimatedCompletion(this.placePickerViewController, true, null);
+
 
         return new Promise<Place>((resolve, reject) => {
             this.setPromise(resolve, reject);
@@ -168,41 +196,21 @@ class PlacePicker extends NSObject implements GMSPlacePickerViewControllerDelega
 
     public placePickerDidPickPlace(placePicker: GMSPlacePickerViewController, place: GMSPlace): void {
         this.destroyPlacePicker();
-        if(this.resolve) {
-            this.resolve({
-                name: place.name,
-                id: place.placeID,
-                address: place.formattedAddress,
-                attributions: place.attributions,
-                types: utils.ios.collections.nsArrayToJSArray(place.types),
-                coordinates: {
-                    latitude: place.coordinate.latitude,
-                    longitude: place.coordinate.longitude
-                },
-                viewport: {
-                    northEast: {
-                        latitude: place.viewport.northEast.latitude,
-                        longitude: place.viewport.northEast.longitude
-                    },
-                    southWest: {
-                        latitude: place.viewport.southWest.latitude,
-                        longitude: place.viewport.southWest.longitude
-                    }
-                }
-            });
+        if (this.resolve) {
+            this.resolve(placeTransformer(place));
         }
     }
 
     public placePickerDidFailWithError(placePicker: GMSPlacePickerViewController, error: NSError): void {
         this.destroyPlacePicker();
-        if(this.reject) {
+        if (this.reject) {
             this.reject(error);
         }
     }
 
     public placePickerDidCancel(placePicker: GMSPlacePickerViewController): void {
         this.destroyPlacePicker();
-        if(this.resolve) {
+        if (this.resolve) {
             this.resolve(null);
         }
     }
@@ -213,8 +221,7 @@ class PlacePicker extends NSObject implements GMSPlacePickerViewControllerDelega
     }
 
     private destroyPlacePicker(): void {
-        let rootViewController = utils.ios.getter(UIApplication, UIApplication.sharedApplication).keyWindow.rootViewController; 
-        rootViewController.dismissViewControllerAnimatedCompletion(true, null); 
+        this.currentViewController.dismissViewControllerAnimatedCompletion(true, null);
         PlacePicker._instance = null;
     }
 }

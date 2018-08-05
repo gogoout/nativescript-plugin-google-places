@@ -5,7 +5,8 @@ export interface Place {
     attributions: string,
     types: string[],
     coordinates: Location,
-    viewport: Viewport
+    viewport?: Viewport,
+    addressComponents?: AddressComponents
 }
 
 export interface Location {
@@ -14,8 +15,12 @@ export interface Location {
 }
 
 export interface Viewport {
-    southWest: Location;    
+    southWest: Location;
     northEast: Location;
+}
+
+export interface AddressComponents {
+    [type: string]: string
 }
 
 export function init(): void;

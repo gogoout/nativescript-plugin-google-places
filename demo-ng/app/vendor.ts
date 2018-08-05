@@ -12,4 +12,4 @@ require("nativescript-angular/platform-static");
 require("nativescript-angular/forms");
 require("nativescript-angular/router");
 
-require("nativescript-plugin-google-places");
+require("nativescript-plugin-gplaces");

@@ -2,7 +2,8 @@
 
 [![npm version](https://badge.fury.io/js/nativescript-plugin-google-places.svg)](https://badge.fury.io/js/nativescript-plugin-google-places)
 
-Nativescript plugin for [Google Places API](https://developers.google.com/places/)
+Nativescript plugin for [Google Places API](https://developers.google.com/places/). Based on [tylergrinn](https://github.com/tylergrinn/nativescript-plugin-google-places) and [debevv](https://github.com/debevv/nativescript-plugin-google-places).
+
 
 <img src="https://developers.google.com/places/images/placepicker.png" alt="Android" height="400"/> <img src="https://developers.google.com/places/images/placepicker-ios.png" alt="Android" height="400"/>
 
@@ -136,6 +137,8 @@ or the dark version:
 | id | string | Unique ID of the place |
 | attributions | string | Attributions of the place |
 | types | string[] | List of place types ([more info](https://developers.google.com/places/ios-api/supported_types))
+| addressComponents(ios only) | [type:string]:string | Object of addressComponents ([available types](https://developers.google.com/places/ios-sdk/supported_types#table2))
+
     
 | Location |||
 | --- | --- | --- |
@@ -174,3 +177,8 @@ Now you can be sure the places array you get from getPlacesById has the same num
 
 #### v1.3.1
 * Added "types" to Place definition.
+
+#### v2.4.1
+* Added longitude and latitude in returning object. Credit to [debevv](https://github.com/debevv/nativescript-plugin-google-places).
+* Added addressComponents in ios (not available in android).
+* Support open from modal in ios (see [related bug](https://github.com/NativeScript/nativescript-imagepicker/issues/79))
