@@ -178,7 +178,10 @@ Now you can be sure the places array you get from getPlacesById has the same num
 #### v1.3.1
 * Added "types" to Place definition.
 
-#### v2.4.1
+#### v2.4.1 - v2.4.4 
 * Added longitude and latitude in returning object. Credit to [debevv](https://github.com/debevv/nativescript-plugin-google-places).
 * Added addressComponents in ios (not available in android).
 * Support open from modal in ios (see [related bug](https://github.com/NativeScript/nativescript-imagepicker/issues/79))
+
+#### v2.4.5
+* Bump googlePlayServicesVersion to 15.0.0, also removed `multiDexEnabled` option in gradle

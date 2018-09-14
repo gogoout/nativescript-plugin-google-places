@@ -1,9 +1,5 @@
 android {
-    productFlavors {
-        "places" {
-            dimension "places"
-        }
-    }
+
 }
 
 repositories {
@@ -16,12 +12,15 @@ repositories {
 
 android {
     defaultConfig {
-        multiDexEnabled true
+//        multiDexEnabled true
     }
 }
 
 dependencies {
-	def googlePlayServicesVersion = project.hasProperty('googlePlayServicesVersion') ? project.googlePlayServicesVersion: "11.2.2"
-    compile "com.google.android.gms:play-services:$googlePlayServicesVersion"
-	compile 'com.android.support:multidex:1.0.1'
+	def googlePlayServicesVersion = project.hasProperty('googlePlayServicesVersion') ? project.googlePlayServicesVersion : "15.0.0"
+//    compile "com.google.android.gms:play-services:$googlePlayServicesVersion"
+    compile "com.google.android.gms:play-services-base:$googlePlayServicesVersion"
+    compile "com.google.android.gms:play-services-places:$googlePlayServicesVersion"
+    compile "com.google.android.gms:play-services-location:$googlePlayServicesVersion"
+//	compile 'com.android.support:multidex:1.0.1'
 }
