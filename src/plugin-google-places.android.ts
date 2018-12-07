@@ -52,9 +52,14 @@ export function pickPlace(viewport: Viewport): Promise<Place> {
             }
 
             app.android.on("activityResult", (args) => {
-                if (args.requestCode === PLACE_PICKER_REQUEST && args.resultCode === android.app.Activity.RESULT_OK) {
-                    let place = com.google.android.gms.location.places.ui.PlacePicker.getPlace(args.intent, app.android.context);
-                    resolve(placeTransformer(place));
+                if (args.requestCode === PLACE_PICKER_REQUEST) {
+                    if (args.resultCode === android.app.Activity.RESULT_OK) {
+                        let place = com.google.android.gms.location.places.ui.PlacePicker.getPlace(args.intent, app.android.context);
+                        resolve(placeTransformer(place));
+                    }
+                    else{
+                        reject(new Error('pick error'));
+                    }
                 }
             });
 

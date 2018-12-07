@@ -185,3 +185,6 @@ Now you can be sure the places array you get from getPlacesById has the same num
 
 #### v2.4.5
 * Bump googlePlayServicesVersion to 15.0.0, also removed `multiDexEnabled` option in gradle
+
+#### v2.4.6
+* Reject `pickPlace()` promise if user cancel the picking action
