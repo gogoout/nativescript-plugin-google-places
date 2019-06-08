@@ -1,11 +1,12 @@
-# Nativescript Plugin GPlaces
-
-[![npm version](https://badge.fury.io/js/nativescript-plugin-gplaces.svg)](https://badge.fury.io/js/nativescript-plugin-gplaces)
-
-## DEPRECATED
+# DEPRECATED
 Google announced Map Places Picker is deprecated as of January 29, 2019, and will be turned off on July 29, 2019.
 I recommend you use [nativescript-google-maps-sdk](https://github.com/dapriett/nativescript-google-maps-sdk) to build your own picker instead. 
 
+----------------------------------------------------------------
+
+# Nativescript Plugin GPlaces
+
+[![npm version](https://badge.fury.io/js/nativescript-plugin-gplaces.svg)](https://badge.fury.io/js/nativescript-plugin-gplaces)
 
 Nativescript plugin for [Google Places API](https://developers.google.com/places/). Based on [tylergrinn](https://github.com/tylergrinn/nativescript-plugin-google-places) and [debevv](https://github.com/debevv/nativescript-plugin-google-places).
 
